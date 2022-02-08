@@ -1,0 +1,9 @@
+1、根据 bin\zkServer.sh start 命名找到 main函数入口类
+
+org.apache.zookeeper.server.quorum.QuorumPeerMain
+
+2、通过阅读文档了解下架构基本信息：
+如何初始化、如何加入集群、如何选举、如何退出集群，ZAB协议等
+
+3、从main函数开始阅读：初始化、运行、退出
+
