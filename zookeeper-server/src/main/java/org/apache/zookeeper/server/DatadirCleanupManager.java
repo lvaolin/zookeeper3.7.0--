@@ -91,6 +91,9 @@ public class DatadirCleanupManager {
      *
      * @see PurgeTxnLog#purge(File, File, int)
      */
+    /**
+     * 启动 定时器  来清理快照和日志
+     */
     public void start() {
         if (PurgeTaskStatus.STARTED == purgeTaskStatus) {
             LOG.warn("Purge task is already running.");
@@ -101,9 +104,11 @@ public class DatadirCleanupManager {
             LOG.info("Purge task is not scheduled.");
             return;
         }
-
+        //一个简单的定时器
         timer = new Timer("PurgeTask", true);
+        //这个是具体的清理任务
         TimerTask task = new PurgeTask(dataLogDir, snapDir, snapRetainCount);
+        //按固定频率调度
         timer.scheduleAtFixedRate(task, 0, TimeUnit.HOURS.toMillis(purgeInterval));
 
         purgeTaskStatus = PurgeTaskStatus.STARTED;
@@ -122,6 +127,9 @@ public class DatadirCleanupManager {
         }
     }
 
+    /**
+     * 具体的清理任务
+     */
     static class PurgeTask extends TimerTask {
 
         private File logsDir;

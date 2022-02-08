@@ -146,27 +146,32 @@ public class QuorumPeerMain {
             config.getDataLogDir(),//日志目录
             config.getSnapRetainCount(),//快照保留的个数
             config.getPurgeInterval());//清理周期
-        purgeMgr.start();
+        purgeMgr.start();//启动定时器
 
         if (args.length == 1 && config.isDistributed()) {
+            //分布式模式运行
             runFromConfig(config);
         } else {
+            //单机模式运行
             LOG.warn("Either no config or no quorum defined in config, running in standalone mode");
             // there is only server in the quorum -- run as standalone
             ZooKeeperServerMain.main(args);
         }
     }
 
+    /**
+     * 集群模式运行
+     */
     public void runFromConfig(QuorumPeerConfig config) throws IOException, AdminServerException {
         try {
             ManagedUtil.registerLog4jMBeans();
         } catch (JMException e) {
             LOG.warn("Unable to register log4j JMX control", e);
         }
-
+        //当前节点serverId
         LOG.info("Starting quorum peer, myid=" + config.getServerId());
         final MetricsProvider metricsProvider;
-        try {
+        try {//监控指标信息提供者
             metricsProvider = MetricsProviderBootstrap.startMetricsProvider(
                 config.getMetricsProviderClassName(),
                 config.getMetricsProviderConfiguration());

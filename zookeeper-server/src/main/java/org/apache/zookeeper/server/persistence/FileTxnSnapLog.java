@@ -557,6 +557,7 @@ public class FileTxnSnapLog {
     }
 
     /**
+     * 找到最近n个有效快照
      * the n recent valid snapshots
      * @param n the number of recent valid snapshots
      * @return the list of n recent valid snapshots, with

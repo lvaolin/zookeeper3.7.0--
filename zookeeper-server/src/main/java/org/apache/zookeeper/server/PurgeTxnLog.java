@@ -62,6 +62,8 @@ public class PurgeTxnLog {
     private static final String PREFIX_LOG = "log";
 
     /**
+     *
+     * 清理快照的逻辑
      * Purges the snapshot and logs keeping the last num snapshots and the
      * corresponding logs. If logs are rolling or a new snapshot is created
      * during this process, these newest N snapshots or any data logs will be
@@ -73,15 +75,17 @@ public class PurgeTxnLog {
      * @throws IOException
      */
     public static void purge(File dataDir, File snapDir, int num) throws IOException {
-        if (num < 3) {
+        if (num < 3) {//需要最少保留3个快照，呵呵
             throw new IllegalArgumentException(COUNT_ERR_MSG);
         }
 
         FileTxnSnapLog txnLog = new FileTxnSnapLog(dataDir, snapDir);
 
+        //这是要保留的快照
         List<File> snaps = txnLog.findNValidSnapshots(num);
         int numSnaps = snaps.size();
         if (numSnaps > 0) {
+            //清理 最后一个快照之后的 快照
             purgeOlderSnapshots(txnLog, snaps.get(numSnaps - 1));
         }
     }
@@ -135,6 +139,7 @@ public class PurgeTxnLog {
 
         }
         // add all non-excluded log files
+        //把 要删除的 日志文件 添加到删除列表中
         File[] logs = txnLog.getDataDir().listFiles(new MyFileFilter(PREFIX_LOG));
         List<File> files = new ArrayList<>();
         if (logs != null) {
@@ -142,12 +147,14 @@ public class PurgeTxnLog {
         }
 
         // add all non-excluded snapshot files to the deletion list
+        //把 要删除的 快照文件 添加到删除列表中
         File[] snapshots = txnLog.getSnapDir().listFiles(new MyFileFilter(PREFIX_SNAPSHOT));
         if (snapshots != null) {
             files.addAll(Arrays.asList(snapshots));
         }
 
         // remove the old files
+        //进行文件删除操作
         for (File f : files) {
             final String msg = String.format(
                 "Removing file: %s\t%s",
@@ -165,6 +172,7 @@ public class PurgeTxnLog {
     }
 
     /**
+     * 手动执行清理命令用
      * @param args dataLogDir [snapDir] -n count
      * dataLogDir -- path to the txn log directory
      * snapDir -- path to the snapshot directory
